@@ -801,6 +801,9 @@ enum e_optcode {
    OPT_TUN_DEVICE,	/* tun: /dev/net/tun ... */
    OPT_TUN_NAME,	/* tun: tun0 */
    OPT_TUN_TYPE,	/* tun: tun|tap */
+   OPT_FUSE_MP,		/* fuse: mount point */
+   OPT_FUSE_OPTION,	/* fuse: options */
+   OPT_FUSE_FSTYPE,	/* fuse: fstype */
    OPT_UMASK,
    OPT_UNIX_TIGHTSOCKLEN,	/* UNIX domain sockets */
    OPT_UNLINK,
