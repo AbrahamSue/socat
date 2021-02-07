@@ -17,25 +17,17 @@ static int xioopen_fuse(int argc, const char *argv[], struct opt *opts, int xiof
 const struct optdesc opt_fuse_mountpoint = { "mp",           NULL,      OPT_FUSE_MP,          GROUP_FD,          PH_OPEN, TYPE_FILENAME, OFUNC_SPEC };
 const struct optdesc opt_fuse_option     = { "option",       NULL,      OPT_FUSE_NAME,        GROUP_FD, PH_FD,   TYPE_STRING,   OFUNC_SPEC };
 const struct optdesc opt_fuse_fstype     = { "fstype",       NULL,      OPT_FUSE_FSTYPE,      GROUP_FD, PH_FD,   TYPE_STRING,   OFUNC_SPEC };
+const struct optdesc opt_fuse_lowlevel   = { "lowlevel",     NULL,      OPT_FUSE_LOWLEVEL,      GROUP_FD, PH_FD,   TYPE_STRING,   OFUNC_SPEC };
 #if LATER
 const struct optdesc opt_route           = { "route",           NULL,          OPT_ROUTE,           GROUP_INTERFACE, PH_INIT, TYPE_STRING,   OFUNC_SPEC };
 #endif
 
-static const struct xioaddr_endpoint_desc xioendpoint_fuse1    = { XIOADDR_SYS, "fuse",   1, XIOBIT_ALL, GROUP_FD|GROUP_NAMED|GROUP_OPEN|GROUP_FUSE, XIOSHUT_CLOSE, XIOCLOSE_NONE, xioopen_fuse, 0, 0, 0 HELP(":<ip-addr>/<bits>") };
+static const struct xioaddr_endpoint_desc xioendpoint_fuse1    = { XIOADDR_SYS, "fuse",   1, XIOBIT_ALL, GROUP_FD|GROUP_NAMED|GROUP_OPEN, XIOSHUT_CLOSE, XIOCLOSE_NONE, xioopen_fuse, 0, 0, 0 HELP(":mount-point") };
 
 const union xioaddr_desc *xioaddrs_fuse[] = {
    (union xioaddr_desc *)&xioendpoint_fuse1,
    NULL
 };
-/* "if-name"=fuse3
-// "route"=address/netmask
-// "ip6-route"=address/netmask
-// "iff-broadcast"
-// "iff-debug"
-// "iff-promisc"
-// see .../linux/if.h
-*/
-
 
 #if LATER
 /* sub options for route option */
@@ -47,8 +39,9 @@ static const struct optname xio_route_options[] = {
 #endif
 
 static int xioopen_fuse(int argc, const char *argv[], struct opt *opts, int xioflags, xiofile_t *xfd, unsigned groups, int dummy1, int dummy2, int dummy3) {
-   char *fusedevice = NULL;
-   char *fusename = NULL, *fusetype = NULL;
+   char *fuse_mp= NULL;
+   char *fuse_device="/dev/fuse";
+   char *fuse_option = NULL, *fuse_fstype = NULL;
    int pf = /*! PF_UNSPEC*/ PF_INET;
    struct xiorange network;
    bool no_pi = false;
@@ -60,13 +53,13 @@ static int xioopen_fuse(int argc, const char *argv[], struct opt *opts, int xiof
    char *ifaddr;
    int result;
 
-   if (argc > 2 || argc < 0) {
-      Error2("%s: wrong number of parameters (%d instead of 0 or 1)",
+   if (argc != 2) {
+      Error2("%s: wrong number of parameters (%d instead of 1)",
 	     argv[0], argc-1);
    }
 
-   if (retropt_string(opts, OPT_FUSE_DEVICE, &fusedevice) != 0) {
-      fusedevice = strdup("/dev/net/fuse");
+   if (retropt_string(opts, OPT_FUSE_MP, &fuse_mp) != 0) {
+      Error2("Mount point %s is not available\n", fuse_mp);
    }
 
    /*! socket option here? */
